@@ -1,0 +1,28 @@
+# ============================================================
+# PROJET FINAL SNOWFLAKE DATAOPS - GROUPE 13 (ESTIAM PARIS)
+# requirements.txt - Dépendances Python
+# ============================================================
+
+# --- Connecteur Snowflake ---
+snowflake-connector-python==3.6.0
+snowflake-sqlalchemy==1.5.1
+
+# --- Traitement des données ---
+pandas==2.2.1
+numpy==1.26.4
+pyarrow==15.0.2
+
+# --- Chargement & ingestion ---
+openpyxl==3.1.2
+
+# --- Qualité des données ---
+great-expectations==0.18.12
+
+# --- Variables d'environnement ---
+python-dotenv==1.0.1
+
+# --- Logging & monitoring ---
+loguru==0.7.2
+
+# --- Tests ---
+pytest==8.1.1
