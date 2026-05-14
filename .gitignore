@@ -18,7 +18,9 @@ Thumbs.db
 .DS_Store
 
 # 6. Données et Code
-data/
+# L'étoile est vitale : on ignore le contenu, pas la porte
+data/*
+# Maintenant Git voit l'exception !
 !data/ingestion/
 *.csv
 *.parquet
