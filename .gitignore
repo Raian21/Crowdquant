@@ -1,0 +1,50 @@
+# 1. Mots de passe et secrets (LE PLUS IMPORTANT)
+.env
+.env.*
+
+# 2. Fichiers générés par Python
+__pycache__/
+*.py[cod]
+
+# 3. Environnements virtuels (très lourds)
+venv/
+env/
+.venv/
+
+# 4. Fichiers de ton éditeur (VS Code)
+.vscode/
+
+# 5. Fichiers systèmes invisibles (Windows/Mac)
+Thumbs.db
+.DS_Store
+
+# 6. Données brutes (trop lourdes pour Git)
+data/
+*.csv
+*.parquet
+
+# 7. Modèles ML sauvegardés (lourds)
+*.pkl
+*.joblib
+models/
+
+# 8. Logs
+*.log
+logs/
+
+
+# Spark / exécution
+checkpoints/
+logs/
+
+# Modèles
+ml/models/
+*.pkl
+*.joblib
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
