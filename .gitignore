@@ -5,7 +5,6 @@
 # 2. Fichiers générés par Python
 __pycache__/
 
-
 # 3. Environnements virtuels (très lourds)
 venv/
 env/
@@ -18,25 +17,23 @@ env/
 Thumbs.db
 .DS_Store
 
-# 6. Données brutes (trop lourdes pour Git)
+# 6. Données et Code
 data/
+!data/ingestion/
 *.csv
 *.parquet
+*.json
 
 # 7. Modèles ML sauvegardés (lourds)
 *.pkl
 *.joblib
 models/
+ml/models/
 
 # 8. Logs
 *.log
 logs/
 
-# Spark
+# 9. Spark
+spark_checkpoints/
 checkpoints/
-logs/
-
-# ML models
-ml/models/
-*.pkl
-*.joblib
