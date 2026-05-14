@@ -4,7 +4,7 @@
 
 # 2. Fichiers générés par Python
 __pycache__/
-*.py[cod]
+
 
 # 3. Environnements virtuels (très lourds)
 venv/
