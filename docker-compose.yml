@@ -1,0 +1,141 @@
+
+
+services:
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: crowdquant_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - crowdquant_network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: crowdquant_kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+    networks:
+      - crowdquant_network
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: crowdquant_zookeeper:2181
+
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://crowdquant_kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: crowdquant_kafka_init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - crowdquant_network
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo 'Création des topics Kafka...'
+
+      kafka-topics --bootstrap-server crowdquant_kafka:29092 \
+        --create --if-not-exists \
+        --topic prices_raw \
+        --partitions 1 \
+        --replication-factor 1
+
+      kafka-topics --bootstrap-server crowdquant_kafka:29092 \
+        --create --if-not-exists \
+        --topic social_raw \
+        --partitions 1 \
+        --replication-factor 1
+
+      echo 'Topics Kafka créés avec succès.'
+      "
+
+  minio:
+    image: minio/minio:latest
+    container_name: crowdquant_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file:
+      - .env
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - crowdquant_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: crowdquant_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - crowdquant_network
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo 'Initialisation MinIO...'
+
+      mc alias set local http://crowdquant_minio:9000 $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD
+
+      mc mb --ignore-existing local/bronze
+      mc mb --ignore-existing local/silver
+
+      echo 'Buckets MinIO créés avec succès : bronze, silver.'
+      "
+
+  postgres:
+    image: postgres:15
+    container_name: crowdquant_postgres_gold
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - crowdquant_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  minio_data:
+  postgres_data:
+
+networks:
+  crowdquant_network:
+    driver: bridge

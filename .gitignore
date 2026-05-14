@@ -32,19 +32,11 @@ models/
 *.log
 logs/
 
-
-# Spark / exécution
+# Spark
 checkpoints/
 logs/
 
-# Modèles
+# ML models
 ml/models/
 *.pkl
 *.joblib
-
-# Jupyter
-.ipynb_checkpoints/
-
-# OS
-.DS_Store
-Thumbs.db
